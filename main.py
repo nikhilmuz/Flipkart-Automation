@@ -83,7 +83,7 @@ subprocess.call(
     shell=True)
 captcha = raw_input("Enter Captcha Text : ")
 
-print("Processing COD Payment")
+print("Verifying Captcha")
 url = "https://payments.flipkart.com/fkpay/api/v3/payments/pay"
 querystring = {"token": token, "instrument": "COD"}
 payload = "{\"payment_instrument\":\"COD\",\"token\":\"" + token + "\",\"captcha_text\":{\"id\":\"" + cap_id + "\",\"text\":\"" + str(
@@ -100,6 +100,13 @@ headers = {
 }
 response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
 res = response.json()
+
+if res['response_status'] == 'FAILED':
+    print("Incorrect Captcha!")
+    print("Exiting")
+    exit()
+else:
+    print("Captcha Verified Successfully")
 
 print("Processing Order")
 url = "https://www.flipkart.com/api/3/checkout/pgResponse/desktop"
@@ -126,7 +133,7 @@ print(response.headers)
 
 print("Logging You Out")
 url = "https://www.flipkart.com/api/2/user/logout"
-payload = str(time.time()).replace(".", "")+"0"
+payload = str(time.time()).replace(".", "") + "0"
 headers = {
     'Origin': "https://www.flipkart.com",
     'AlexaToolbar-ALX_NS_PH': "AlexaToolbar/alx-4.0.3",
@@ -142,9 +149,9 @@ headers = {
     'Referer': "https://www.flipkart.com/",
     'DNT': "1",
     'cache-control': "no-cache"
-    }
+}
 response = requests.request("POST", url, data=payload, cookies=cookies, headers=headers)
-if response.status_code==200:
+if response.status_code == 200:
     print("Logged Out Successfully")
 else:
     print("Error Logging Out")
