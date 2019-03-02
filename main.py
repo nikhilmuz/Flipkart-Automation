@@ -11,7 +11,8 @@ xua = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ch
       "FKUA/website/41/website/Desktop "
 ua = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36"
 
-# pid = "LSTMOBFAJB4CWKAZGPZVOYNQH"
+#pid = "LSTCHCFBEZHTKMXVYQZN0PFCC" #Out Of Stock
+#pid = "LSTACCFAWQKDMREPNBRCBSZER" #In Stock
 
 
 def logout():
@@ -36,7 +37,7 @@ def logout():
     }
     response = requests.request("POST", url, data=payload, cookies=cookies, headers=headers)
     if response.status_code == 200:
-        subprocess.call("rm captcha.jpg", shell=False)
+        subprocess.call("rm captcha.jpg", shell=True)
         print("Logged Out Successfully")
     else:
         print("Error Logging Out")
@@ -55,14 +56,15 @@ def add_to_cart(pid):
     while True:
         response = requests.request("POST", url, data=payload, cookies=cookies, headers=headers)
         res = response.json()
-        print(res['STATUS_CODE'])
         if res['STATUS_CODE'] == 200:
+            print("Added to Cart Successfully")
             break
-        print(res['ERROR_CODE'])
+        if res['ERROR_CODE'] == 0:
+            print("Currently Out Of Stock!")
+            print("Retrying...")
         if res['ERROR_CODE'] == 429:
             print("API Error")
-
-    print("Added to Cart Successfully")
+            print("Retrying...")
 
 
 def login():
@@ -178,13 +180,16 @@ def process_order(response):
 
     print("Generating Response")
     response = requests.request("POST", url, data=payload, cookies=cookies, headers=headers)
-    print(response.status_code)
+    if response.status_code == 200:
+        print(
+            "Order Placed Successfully! Check \"Orders\" section of your account after a few minutes to confirm to "
+            "confirm "
+        )
 
 
 login()
 add_to_cart(pid)
 token = get_payment_token()
-res = verify_captcha(get_captcha(), token)
-process_order(res)
+process_order(verify_captcha(get_captcha(), token))
 logout()
 print("Exiting")
