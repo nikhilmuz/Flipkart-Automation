@@ -182,8 +182,7 @@ def process_order(response):
     response = requests.request("POST", url, data=payload, cookies=cookies, headers=headers)
     if response.status_code == 200:
         print(
-            "Order Placed Successfully! Check \"Orders\" section of your account after a few minutes to confirm to "
-            "confirm "
+            "Order Placed Successfully! Check \"Orders\" section of your account after a few minutes to confirm"
         )
 
 
