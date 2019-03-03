@@ -3,16 +3,10 @@ import requests
 import subprocess
 import getpass
 
-pid = raw_input("Enter Product ID (lid in URL) : ")
-phone = raw_input("Enter Phone Number : ")
-password = getpass.getpass("Enter Password : ")
-
 xua = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36 " \
       "FKUA/website/41/website/Desktop "
 ua = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36"
-
-#pid = "LSTCHCFBEZHTKMXVYQZN0PFCC" #Out Of Stock
-#pid = "LSTACCFAWQKDMREPNBRCBSZER" #In Stock
+loggedIn = False
 
 
 def logout():
@@ -68,7 +62,7 @@ def add_to_cart(pid):
 
 
 def login():
-    global cookies
+    global cookies, loggedIn
     print("Logging In")
     url = "https://www.flipkart.com/api/4/user/authenticate"
     payload = "{\"loginId\":\"+91" + str(phone) + "\",\"password\":\"" + str(password) + "\"}"
@@ -94,6 +88,7 @@ def login():
         print("Incorrect Credentials")
         exit()
     cookies = response.cookies
+    loggedIn = True
 
 
 def get_payment_token():
@@ -186,9 +181,27 @@ def process_order(response):
         )
 
 
-login()
-add_to_cart(pid)
-token = get_payment_token()
-process_order(verify_captcha(get_captcha(), token))
-logout()
-print("Exiting")
+try:
+    pid = raw_input("Enter Product ID (lid in URL) : ")
+    phone = raw_input("Enter Phone Number : ")
+    password = getpass.getpass("Enter Password : ")
+
+    # pid = "LSTCHCFBEZHTKMXVYQZN0PFCC" #Out Of Stock
+    # pid = "LSTACCFAWQKDMREPNBRCBSZER"  # In Stock
+
+
+
+    login()
+    add_to_cart(pid)
+    token = get_payment_token()
+    process_order(verify_captcha(get_captcha(), token))
+    logout()
+    print("Exiting")
+
+except KeyboardInterrupt:
+    print("\n")
+    if loggedIn:
+        logout()
+    import sys
+    print("Exiting")
+    sys.exit(0)
